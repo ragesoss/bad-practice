@@ -129,11 +129,16 @@ class TanpuraProcessor extends AudioWorkletProcessor {
         // Decay
         const decayed = filtered * this.decayCoeff;
 
-        // Write back to buffer
-        s.buffer[s.writeIndex] = decayed;
+        // Soft-limit feedback to prevent jawari asymmetry from causing
+        // runaway growth — tanh is transparent at normal amplitudes but
+        // provides a ceiling that blocks exponential energy buildup.
+        const clamped = Math.tanh(decayed);
+
+        // Write back to buffer (NaN guard prevents permanent string death)
+        s.buffer[s.writeIndex] = clamped === clamped ? clamped : 0;
         s.writeIndex = (s.writeIndex + 1) % MAX_BUFFER_SIZE;
 
-        mix += decayed;
+        mix += clamped;
       }
 
       // Mix down and soft clip
