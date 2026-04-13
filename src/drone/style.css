@@ -1,0 +1,35 @@
+/* String visualization */
+.string-display {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1.5rem 0;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.string-viz {
+  width: 6px;
+  height: 120px;
+  background: var(--accent-muted);
+  border-radius: 3px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transition: background 0.15s, box-shadow 0.3s;
+}
+
+.string-viz.plucked {
+  background: var(--accent);
+  box-shadow: 0 0 20px var(--accent), 0 0 40px rgba(233, 69, 96, 0.3);
+}
+
+.string-label {
+  position: absolute;
+  bottom: -1.5rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}

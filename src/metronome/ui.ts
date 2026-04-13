@@ -12,21 +12,8 @@ import { setRecipe, type SoundRecipe } from "./audio";
 const $ = <T extends HTMLElement>(id: string): T =>
   document.getElementById(id) as T;
 
-const BADNESS_LABELS: [number, string][] = [
-  [0, "Perfect"],
-  [1, "Slightly Off"],
-  [26, "Sloppy"],
-  [51, "Drunk"],
-  [76, "Unhinged"],
-  [100, "Chaotic"],
-];
-
-function getBadnessLabel(value: number): string {
-  let label = "Perfect";
-  for (const [threshold, text] of BADNESS_LABELS) {
-    if (value >= threshold) label = text;
-  }
-  return label;
+function formatBadness(value: number): string {
+  return (value / 100).toFixed(2);
 }
 
 // Tap tempo state
@@ -124,7 +111,7 @@ export function initUI(): void {
   badnessSlider.addEventListener("input", () => {
     const val = Number(badnessSlider.value);
     setBadness(val / 100);
-    badnessDescriptor.textContent = getBadnessLabel(val);
+    badnessDescriptor.textContent = formatBadness(val);
   });
 
   // Sound picker

@@ -1,0 +1,53 @@
+#app {
+  max-width: 500px;
+  gap: 2.5rem;
+}
+
+.tool-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+}
+
+.tool-card {
+  display: block;
+  text-align: center;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: var(--radius);
+  padding: 2.25rem 1.5rem;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tool-card:hover {
+  transform: translateY(-3px);
+}
+
+.tool-card h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* each card gets its own warhol color */
+.tool-card:nth-child(1) {
+  border-color: var(--pink);
+}
+.tool-card:nth-child(1) h2 {
+  color: var(--pink);
+}
+.tool-card:nth-child(1):hover {
+  box-shadow: 0 6px 24px rgba(255, 60, 120, 0.2);
+}
+
+.tool-card:nth-child(2) {
+  border-color: var(--turquoise);
+}
+.tool-card:nth-child(2) h2 {
+  color: var(--turquoise);
+}
+.tool-card:nth-child(2):hover {
+  box-shadow: 0 6px 24px rgba(45, 212, 191, 0.2);
+}

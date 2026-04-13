@@ -3,56 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bad Metronome</title>
-    <meta name="description" content="A metronome that's bad on purpose." />
-    <meta name="theme-color" content="#1a1a2e" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Bad Practice</title>
+    <meta name="description" content="Music practice tools that are bad on purpose." />
+    <meta name="theme-color" content="#1b1b1b" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>" />
   </head>
   <body>
     <div id="app">
       <header>
-        <h1>Bad Metronome</h1>
+        <h1>Bad Practice</h1>
       </header>
-
-      <div class="beat-display">
-        <div class="beat-dot" id="beat-0"></div>
-        <div class="beat-dot" id="beat-1"></div>
-        <div class="beat-dot" id="beat-2"></div>
-        <div class="beat-dot" id="beat-3"></div>
-      </div>
-
-      <div class="bpm-display">
-        <button class="bpm-adjust" id="bpm-down" aria-label="Decrease BPM">−</button>
-        <div class="bpm-value" id="bpm-value">120</div>
-        <button class="bpm-adjust" id="bpm-up" aria-label="Increase BPM">+</button>
-      </div>
-      <label class="slider-label" for="bpm-slider">BPM</label>
-      <input type="range" id="bpm-slider" min="40" max="240" value="120" step="1" />
-
-      <div class="badness-header">
-        <label class="slider-label" for="badness-slider">Badness</label>
-        <span class="badness-descriptor" id="badness-descriptor">Perfect</span>
-      </div>
-      <input type="range" id="badness-slider" min="0" max="100" value="0" step="1" />
-
-      <div class="sound-picker">
-        <label class="slider-label" for="sound-select">Sound</label>
-        <select id="sound-select">
-          <option value="clave">Clave</option>
-          <option value="woodblock">Woodblock</option>
-          <option value="noise-wood">Noise Wood</option>
-          <option value="sine">Sine</option>
-        </select>
-      </div>
-
-      <div class="controls">
-        <button class="btn-start" id="start-stop">Start</button>
-        <button class="btn-tap" id="tap-tempo">Tap Tempo</button>
-      </div>
+      <nav class="tool-grid">
+        <a class="tool-card" href="./metronome/">
+          <h2>Bad Metronome</h2>
+        </a>
+        <a class="tool-card" href="./drone/">
+          <h2>Bad Drone</h2>
+        </a>
+      </nav>
     </div>
-
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/landing/main.ts"></script>
   </body>
 </html>

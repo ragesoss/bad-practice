@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bad Drone</title>
+    <meta name="description" content="A tanpura drone that's bad on purpose." />
+    <meta name="theme-color" content="#1b1b1b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>" />
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <a class="back-link" href="../">Bad Practice</a>
+        <h1>Bad Drone</h1>
+      </header>
+
+      <div class="string-display">
+        <div class="string-viz" id="string-0"><span class="string-label">Pa</span></div>
+        <div class="string-viz" id="string-1"><span class="string-label">Sa</span></div>
+        <div class="string-viz" id="string-2"><span class="string-label">Sa</span></div>
+        <div class="string-viz" id="string-3"><span class="string-label">Sa</span></div>
+      </div>
+
+      <div class="tonic-picker">
+        <label class="slider-label" for="tonic-select">Tonic (Sa)</label>
+        <select id="tonic-select">
+          <option value="C" selected>C</option>
+          <option value="C#">C# / Db</option>
+          <option value="D">D</option>
+          <option value="D#">D# / Eb</option>
+          <option value="E">E</option>
+          <option value="F">F</option>
+          <option value="F#">F# / Gb</option>
+          <option value="G">G</option>
+          <option value="G#">G# / Ab</option>
+          <option value="A">A</option>
+          <option value="A#">A# / Bb</option>
+          <option value="B">B</option>
+        </select>
+      </div>
+
+      <div class="tuning-picker">
+        <label class="slider-label" for="tuning-select">Tuning</label>
+        <select id="tuning-select">
+          <option value="pa" selected>Pa Sa Sa Sa</option>
+          <option value="ma">Ma Sa Sa Sa</option>
+          <option value="ni">Ni Sa Sa Sa</option>
+        </select>
+      </div>
+
+      <div class="badness-header">
+        <label class="slider-label" for="badness-slider">Badness</label>
+        <span class="badness-descriptor" id="badness-descriptor">0.50</span>
+      </div>
+      <input type="range" id="badness-slider" min="0" max="100" value="50" step="1" />
+
+      <div class="jawari-header">
+        <label class="slider-label" for="jawari-slider">Jawari (Buzz)</label>
+        <span class="jawari-value" id="jawari-value">50%</span>
+      </div>
+      <input type="range" id="jawari-slider" min="0" max="100" value="50" step="1" />
+
+      <div class="controls">
+        <button class="btn-start" id="start-stop">Start</button>
+      </div>
+    </div>
+
+    <script type="module" src="/src/drone/main.ts"></script>
+  </body>
+</html>

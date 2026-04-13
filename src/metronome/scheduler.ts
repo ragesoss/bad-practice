@@ -11,7 +11,7 @@ let timerID: ReturnType<typeof setTimeout> | null = null;
 let nextBeatTime = 0;
 let currentBeat = 0;
 let bpm = 120;
-let badness = 0; // 0.0 – 1.0
+let badness = 0.5; // 0.0 – 1.0
 let onBeat: BeatCallback | null = null;
 
 export function setBpm(value: number): void {
