@@ -9,10 +9,12 @@ import {
   setCentsOffset,
   getCentsOffset,
   getEffectiveNote,
+  setInstrument,
   isPlaying,
   onPluck,
   onDriftUpdate,
   getTuningLabels,
+  type Instrument,
 } from "./drone";
 
 const $ = <T extends HTMLElement>(id: string): T =>
@@ -22,7 +24,14 @@ function formatBadness(value: number): string {
   return (value / 100).toFixed(2);
 }
 
+function formatCents(cents: number): string {
+  const rounded = Math.round(cents);
+  return `${rounded >= 0 ? "+" : ""}${rounded}¢`;
+}
+
+let instrumentSelect: HTMLSelectElement;
 let tonicSelect: HTMLSelectElement;
+let tonicLabel: HTMLElement;
 let centsDisplay: HTMLElement;
 let centsDownBtn: HTMLButtonElement;
 let centsUpBtn: HTMLButtonElement;
@@ -34,10 +43,7 @@ let jawariValue: HTMLElement;
 let startStopBtn: HTMLButtonElement;
 let stringVizEls: HTMLElement[];
 
-function formatCents(cents: number): string {
-  const rounded = Math.round(cents);
-  return `${rounded >= 0 ? "+" : ""}${rounded}¢`;
-}
+let tanpuraControls: HTMLElement;
 
 function flashString(index: number): void {
   const el = stringVizEls[index];
@@ -64,8 +70,16 @@ function updateStartStopUI(): void {
   }
 }
 
+function updateInstrumentUI(inst: Instrument): void {
+  const isTanpura = inst === "tanpura";
+  tanpuraControls.classList.toggle("hidden", !isTanpura);
+  tonicLabel.textContent = isTanpura ? "Tonic (Sa)" : "Pitch";
+}
+
 export async function initUI(): Promise<void> {
+  instrumentSelect = $<HTMLSelectElement>("instrument-select");
   tonicSelect = $<HTMLSelectElement>("tonic-select");
+  tonicLabel = $("tonic-label");
   centsDisplay = $("cents-display");
   centsDownBtn = $<HTMLButtonElement>("cents-down");
   centsUpBtn = $<HTMLButtonElement>("cents-up");
@@ -76,9 +90,18 @@ export async function initUI(): Promise<void> {
   jawariValue = $("jawari-value");
   startStopBtn = $<HTMLButtonElement>("start-stop");
   stringVizEls = [0, 1, 2, 3].map((i) => $(`string-${i}`));
+  tanpuraControls = $("tanpura-controls");
 
   // Pre-load the worklet
   await initDrone();
+
+  // Instrument selector
+  instrumentSelect.addEventListener("change", () => {
+    const inst = instrumentSelect.value as Instrument;
+    setInstrument(inst);
+    updateInstrumentUI(inst);
+    updateStartStopUI();
+  });
 
   // Tonic
   tonicSelect.addEventListener("change", () => {
@@ -132,7 +155,6 @@ export async function initUI(): Promise<void> {
   onDriftUpdate(() => {
     const { note, cents } = getEffectiveNote();
     centsDisplay.textContent = formatCents(cents);
-    // Update tonic selector if drift has crossed into a new note
     if (tonicSelect.value !== note) {
       tonicSelect.value = note;
     }

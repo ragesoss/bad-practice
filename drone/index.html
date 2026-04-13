@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bad Drone</title>
-    <meta name="description" content="A tanpura drone that's bad on purpose." />
+    <meta name="description" content="A drone that's bad on purpose." />
     <meta name="theme-color" content="#1b1b1b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -17,15 +17,16 @@
         <h1>Bad Drone</h1>
       </header>
 
-      <div class="string-display">
-        <div class="string-viz" id="string-0"><span class="string-label">Pa</span></div>
-        <div class="string-viz" id="string-1"><span class="string-label">Sa</span></div>
-        <div class="string-viz" id="string-2"><span class="string-label">Sa</span></div>
-        <div class="string-viz" id="string-3"><span class="string-label">Sa</span></div>
+      <div class="sound-picker">
+        <label class="slider-label" for="instrument-select">Instrument</label>
+        <select id="instrument-select">
+          <option value="tanpura">Tanpura</option>
+          <option value="cello">Cello</option>
+        </select>
       </div>
 
       <div class="tonic-picker">
-        <label class="slider-label" for="tonic-select">Tonic (Sa)</label>
+        <label class="slider-label" id="tonic-label" for="tonic-select">Tonic (Sa)</label>
         <div class="tonic-controls">
           <select id="tonic-select">
             <option value="C" selected>C</option>
@@ -47,29 +48,36 @@
         </div>
       </div>
 
-      <div class="tuning-picker">
-        <label class="slider-label" for="tuning-select">Tuning</label>
-        <select id="tuning-select">
-          <option value="pa" selected>Pa Sa Sa Sa</option>
-          <option value="ma">Ma Sa Sa Sa</option>
-          <option value="ni">Ni Sa Sa Sa</option>
-        </select>
-      </div>
-
       <div class="badness-header">
         <label class="slider-label" for="badness-slider">Badness</label>
         <span class="badness-descriptor" id="badness-descriptor">0.50</span>
       </div>
       <input type="range" id="badness-slider" min="0" max="100" value="50" step="1" />
 
-      <div class="jawari-header">
-        <label class="slider-label" for="jawari-slider">Jawari (Buzz)</label>
-        <span class="jawari-value" id="jawari-value">50%</span>
-      </div>
-      <input type="range" id="jawari-slider" min="0" max="100" value="50" step="1" />
-
       <div class="controls">
         <button class="btn-start" id="start-stop">Start</button>
+      </div>
+
+      <div id="tanpura-controls">
+        <div class="string-display">
+          <div class="string-viz" id="string-0"><span class="string-label">Pa</span></div>
+          <div class="string-viz" id="string-1"><span class="string-label">Sa</span></div>
+          <div class="string-viz" id="string-2"><span class="string-label">Sa</span></div>
+          <div class="string-viz" id="string-3"><span class="string-label">Sa</span></div>
+        </div>
+        <div class="tuning-picker">
+          <label class="slider-label" for="tuning-select">Tuning</label>
+          <select id="tuning-select">
+            <option value="pa" selected>Pa Sa Sa Sa</option>
+            <option value="ma">Ma Sa Sa Sa</option>
+            <option value="ni">Ni Sa Sa Sa</option>
+          </select>
+        </div>
+        <div class="jawari-header">
+          <label class="slider-label" for="jawari-slider">Jawari (Buzz)</label>
+          <span class="jawari-value" id="jawari-value">50%</span>
+        </div>
+        <input type="range" id="jawari-slider" min="0" max="100" value="50" step="1" />
       </div>
     </div>
 
