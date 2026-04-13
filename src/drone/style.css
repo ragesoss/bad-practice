@@ -33,3 +33,37 @@
   letter-spacing: 0.04em;
   white-space: nowrap;
 }
+
+/* Tonic controls with cents */
+.tonic-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.cents-adjust {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--accent-muted);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.cents-adjust:active {
+  background: var(--accent-muted);
+}
+
+.cents-display {
+  font-size: 0.85rem;
+  font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+  color: var(--yellow);
+  min-width: 4ch;
+  text-align: center;
+}

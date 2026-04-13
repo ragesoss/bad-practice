@@ -6,8 +6,12 @@ import {
   setTuning,
   setBadness,
   setJawari,
+  setCentsOffset,
+  getCentsOffset,
+  getEffectiveNote,
   isPlaying,
   onPluck,
+  onDriftUpdate,
   getTuningLabels,
 } from "./drone";
 
@@ -19,6 +23,9 @@ function formatBadness(value: number): string {
 }
 
 let tonicSelect: HTMLSelectElement;
+let centsDisplay: HTMLElement;
+let centsDownBtn: HTMLButtonElement;
+let centsUpBtn: HTMLButtonElement;
 let tuningSelect: HTMLSelectElement;
 let badnessSlider: HTMLInputElement;
 let badnessDescriptor: HTMLElement;
@@ -26,6 +33,11 @@ let jawariSlider: HTMLInputElement;
 let jawariValue: HTMLElement;
 let startStopBtn: HTMLButtonElement;
 let stringVizEls: HTMLElement[];
+
+function formatCents(cents: number): string {
+  const rounded = Math.round(cents);
+  return `${rounded >= 0 ? "+" : ""}${rounded}¢`;
+}
 
 function flashString(index: number): void {
   const el = stringVizEls[index];
@@ -54,6 +66,9 @@ function updateStartStopUI(): void {
 
 export async function initUI(): Promise<void> {
   tonicSelect = $<HTMLSelectElement>("tonic-select");
+  centsDisplay = $("cents-display");
+  centsDownBtn = $<HTMLButtonElement>("cents-down");
+  centsUpBtn = $<HTMLButtonElement>("cents-up");
   tuningSelect = $<HTMLSelectElement>("tuning-select");
   badnessSlider = $<HTMLInputElement>("badness-slider");
   badnessDescriptor = $("badness-descriptor");
@@ -68,6 +83,16 @@ export async function initUI(): Promise<void> {
   // Tonic
   tonicSelect.addEventListener("change", () => {
     setTonic(tonicSelect.value);
+  });
+
+  // Cents fine-tune
+  centsDownBtn.addEventListener("click", () => {
+    setCentsOffset(getCentsOffset() - 1);
+    centsDisplay.textContent = formatCents(getCentsOffset());
+  });
+  centsUpBtn.addEventListener("click", () => {
+    setCentsOffset(getCentsOffset() + 1);
+    centsDisplay.textContent = formatCents(getCentsOffset());
   });
 
   // Tuning
@@ -102,4 +127,14 @@ export async function initUI(): Promise<void> {
 
   // Visual feedback
   onPluck((index) => flashString(index));
+
+  // Drift callback — update note display with effective pitch
+  onDriftUpdate(() => {
+    const { note, cents } = getEffectiveNote();
+    centsDisplay.textContent = formatCents(cents);
+    // Update tonic selector if drift has crossed into a new note
+    if (tonicSelect.value !== note) {
+      tonicSelect.value = note;
+    }
+  });
 }

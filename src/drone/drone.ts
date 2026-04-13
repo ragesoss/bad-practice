@@ -1,3 +1,5 @@
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
 // Note frequencies for Sa (tonic) in octave 3
 const TONIC_FREQUENCIES: Record<string, number> = {
   C: 130.81,
@@ -22,6 +24,7 @@ const TUNING_OFFSETS: Record<string, number> = {
 };
 
 type PluckCallback = (stringIndex: number) => void;
+type DriftCallback = (effectiveCents: number) => void;
 
 let ctx: AudioContext | null = null;
 let workletNode: AudioWorkletNode | null = null;
@@ -34,16 +37,24 @@ let tonic = "C";
 let tuning = "pa";
 let badness = 0.5;
 let jawari = 0.5;
+let centsOffset = 0; // manual fine-tune in cents
+let tonicDriftCents = 0; // long-term tonic drift in cents
 let onPluckCb: PluckCallback | null = null;
+let onDriftCb: DriftCallback | null = null;
 
 const baseFrequencies = [0, 0, 0, 0];
-const drifts = [0, 0, 0, 0];
+const stringJitter = [0, 0, 0, 0]; // short-term per-string cents jitter
 
 const PLUCK_INTERVAL_MS = 800;
 const PLUCK_JITTER_MS = 50;
 const DRIFT_INTERVAL_MS = 50;
-const DRIFT_STEP_SIZE = 0.05; // max semitones per step at full badness
-const DRIFT_MEAN_REVERSION = 0.995;
+
+// Long-term tonic drift parameters — pure random walk, no pull-back
+const TONIC_DRIFT_STEP = 20; // max cents per tick at full badness
+
+// Short-term per-string jitter parameters
+const STRING_JITTER_STEP = 0.8; // max cents per tick at full badness
+const STRING_JITTER_REVERSION = 0.95;
 
 function getAudioContext(): AudioContext {
   if (!ctx) {
@@ -69,12 +80,12 @@ function computeFrequencies(): void {
 function sendFrequencies(): void {
   if (!workletNode) return;
   for (let i = 0; i < 4; i++) {
-    const driftedFreq =
-      baseFrequencies[i] * Math.pow(2, drifts[i] / 12);
+    const totalCents = centsOffset + tonicDriftCents + stringJitter[i];
+    const freq = baseFrequencies[i] * Math.pow(2, totalCents / 1200);
     workletNode.port.postMessage({
       type: "setFrequency",
       string: i,
-      value: driftedFreq,
+      value: freq,
     });
   }
 }
@@ -92,13 +103,21 @@ function schedulePluck(): void {
 }
 
 function updateDrift(): void {
-  if (!playing || badness === 0) return;
+  if (!playing) return;
 
-  for (let i = 0; i < 4; i++) {
-    drifts[i] += (Math.random() - 0.5) * DRIFT_STEP_SIZE * badness;
-    drifts[i] *= DRIFT_MEAN_REVERSION;
+  if (badness > 0) {
+    // Long-term: tonic drifts (all strings together) — pure random walk
+    tonicDriftCents += (Math.random() - 0.5) * TONIC_DRIFT_STEP * badness;
+
+    // Short-term: per-string jitter (independent wobble)
+    for (let i = 0; i < 4; i++) {
+      stringJitter[i] += (Math.random() - 0.5) * STRING_JITTER_STEP * badness;
+      stringJitter[i] *= STRING_JITTER_REVERSION;
+    }
   }
+
   sendFrequencies();
+  if (onDriftCb) onDriftCb(centsOffset + tonicDriftCents);
 }
 
 export async function initDrone(): Promise<void> {
@@ -122,7 +141,8 @@ export async function start(): Promise<void> {
   workletNode.port.postMessage({ type: "setDecay", value: 0.9997 });
 
   computeFrequencies();
-  drifts.fill(0);
+  tonicDriftCents = 0;
+  stringJitter.fill(0);
   sendFrequencies();
 
   playing = true;
@@ -155,7 +175,8 @@ export function setTonic(note: string): void {
   tonic = note;
   if (playing) {
     computeFrequencies();
-    drifts.fill(0);
+    tonicDriftCents = 0;
+    stringJitter.fill(0);
     sendFrequencies();
   }
 }
@@ -164,7 +185,8 @@ export function setTuning(pattern: string): void {
   tuning = pattern;
   if (playing) {
     computeFrequencies();
-    drifts.fill(0);
+    tonicDriftCents = 0;
+    stringJitter.fill(0);
     sendFrequencies();
   }
 }
@@ -172,9 +194,38 @@ export function setTuning(pattern: string): void {
 export function setBadness(value: number): void {
   badness = Math.max(0, Math.min(1, value));
   if (badness === 0) {
-    drifts.fill(0);
+    tonicDriftCents = 0;
+    stringJitter.fill(0);
     if (playing) sendFrequencies();
   }
+}
+
+export function setCentsOffset(cents: number): void {
+  centsOffset = cents;
+  if (playing) sendFrequencies();
+  if (onDriftCb) onDriftCb(centsOffset + tonicDriftCents);
+}
+
+export function getCentsOffset(): number {
+  return centsOffset;
+}
+
+export function getEffectiveCents(): number {
+  return centsOffset + tonicDriftCents;
+}
+
+/** Decompose total cents offset from the set tonic into nearest note name + remainder cents */
+export function getEffectiveNote(): { note: string; cents: number } {
+  const totalCents = centsOffset + tonicDriftCents;
+  const tonicIndex = NOTE_NAMES.indexOf(tonic);
+  const semitoneOffset = Math.round(totalCents / 100);
+  const remainder = totalCents - semitoneOffset * 100;
+  const noteIndex = ((tonicIndex + semitoneOffset) % 12 + 12) % 12;
+  return { note: NOTE_NAMES[noteIndex], cents: remainder };
+}
+
+export function onDriftUpdate(cb: DriftCallback): void {
+  onDriftCb = cb;
 }
 
 export function setJawari(value: number): void {

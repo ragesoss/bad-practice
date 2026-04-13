@@ -3,6 +3,7 @@ import {
   getBpm,
   setBadness,
   setOnBeat,
+  setOnDrift,
   isPlaying,
   start,
   stop,
@@ -76,6 +77,8 @@ function updateStartStopUI(): void {
   } else {
     startStopBtn.textContent = "Start";
     startStopBtn.classList.remove("playing");
+    // Reset display to set BPM when stopped
+    bpmValue.textContent = String(getBpm());
   }
 }
 
@@ -134,4 +137,11 @@ export function initUI(): void {
 
   // Beat visual callback
   setOnBeat((beat) => flashBeat(beat));
+
+  // Drift callback — update BPM display with effective (drifted) BPM
+  setOnDrift((effectiveBpm) => {
+    if (isPlaying()) {
+      bpmValue.textContent = String(Math.round(effectiveBpm));
+    }
+  });
 }

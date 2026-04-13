@@ -26,20 +26,25 @@
 
       <div class="tonic-picker">
         <label class="slider-label" for="tonic-select">Tonic (Sa)</label>
-        <select id="tonic-select">
-          <option value="C" selected>C</option>
-          <option value="C#">C# / Db</option>
-          <option value="D">D</option>
-          <option value="D#">D# / Eb</option>
-          <option value="E">E</option>
-          <option value="F">F</option>
-          <option value="F#">F# / Gb</option>
-          <option value="G">G</option>
-          <option value="G#">G# / Ab</option>
-          <option value="A">A</option>
-          <option value="A#">A# / Bb</option>
-          <option value="B">B</option>
-        </select>
+        <div class="tonic-controls">
+          <select id="tonic-select">
+            <option value="C" selected>C</option>
+            <option value="C#">C# / Db</option>
+            <option value="D">D</option>
+            <option value="D#">D# / Eb</option>
+            <option value="E">E</option>
+            <option value="F">F</option>
+            <option value="F#">F# / Gb</option>
+            <option value="G">G</option>
+            <option value="G#">G# / Ab</option>
+            <option value="A">A</option>
+            <option value="A#">A# / Bb</option>
+            <option value="B">B</option>
+          </select>
+          <button class="cents-adjust" id="cents-down" aria-label="Lower pitch">−</button>
+          <span class="cents-display" id="cents-display">+0¢</span>
+          <button class="cents-adjust" id="cents-up" aria-label="Raise pitch">+</button>
+        </div>
       </div>
 
       <div class="tuning-picker">
