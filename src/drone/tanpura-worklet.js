@@ -52,7 +52,12 @@ class TanpuraProcessor extends AudioWorkletProcessor {
     const idealDelay = sampleRate / freq;
     const intDelay = Math.floor(idealDelay);
     const frac = idealDelay - intDelay;
-    s.bufferLength = Math.min(intDelay, MAX_BUFFER_SIZE - 1);
+    // Only resize the buffer on pluck — changing bufferLength mid-ring
+    // causes the read index to jump, producing glitches. Update the
+    // allpass coefficient for smooth fractional tuning adjustment.
+    if (!s.isActive) {
+      s.bufferLength = Math.min(intDelay, MAX_BUFFER_SIZE - 1);
+    }
     s.allpassCoeff = (1 - frac) / (1 + frac);
   }
 
@@ -60,6 +65,10 @@ class TanpuraProcessor extends AudioWorkletProcessor {
     if (index < 0 || index >= NUM_STRINGS) return;
     const s = this.strings[index];
     if (s.frequency <= 0) return;
+
+    // Update buffer length from current frequency on each pluck
+    const idealDelay = sampleRate / s.frequency;
+    s.bufferLength = Math.min(Math.floor(idealDelay), MAX_BUFFER_SIZE - 1);
 
     // Fill buffer with noise, scaled down and filtered for softer attack
     for (let i = 0; i < s.bufferLength; i++) {

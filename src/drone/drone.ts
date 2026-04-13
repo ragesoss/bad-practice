@@ -154,13 +154,22 @@ function updateDrift(): void {
   if (onDriftCb) onDriftCb(centsOffset + tonicDriftCents);
 }
 
-export async function initDrone(): Promise<void> {
+let workletLoaded = false;
+
+async function ensureWorkletLoaded(): Promise<void> {
+  if (workletLoaded) return;
   const ac = getAudioContext();
   const workletUrl = new URL("./tanpura-worklet.js", import.meta.url).href;
   await ac.audioWorklet.addModule(workletUrl);
+  workletLoaded = true;
 }
 
-function startTanpura(ac: AudioContext): void {
+export async function initDrone(): Promise<void> {
+  // No-op — worklet is loaded lazily on first tanpura start
+}
+
+async function startTanpura(ac: AudioContext): Promise<void> {
+  await ensureWorkletLoaded();
   workletNode = new AudioWorkletNode(ac, "tanpura-processor");
   workletNode.connect(ac.destination);
 
@@ -177,7 +186,7 @@ function startTanpura(ac: AudioContext): void {
 function startCello(ac: AudioContext): void {
   celloGain = ac.createGain();
   celloGain.gain.setValueAtTime(0.001, ac.currentTime);
-  celloGain.gain.linearRampToValueAtTime(0.35, ac.currentTime + CELLO_ATTACK_S);
+  celloGain.gain.linearRampToValueAtTime(0.15, ac.currentTime + CELLO_ATTACK_S);
 
   celloFilter = ac.createBiquadFilter();
   celloFilter.type = "lowpass";
@@ -214,14 +223,13 @@ export async function start(): Promise<void> {
   tonicDriftCents = 0;
   stringJitter.fill(0);
   celloJitter = 0;
+  playing = true;
 
   if (instrument === "tanpura") {
-    startTanpura(ac);
+    await startTanpura(ac);
   } else {
     startCello(ac);
   }
-
-  playing = true;
   driftTimerID = setInterval(updateDrift, DRIFT_INTERVAL_MS);
 }
 
