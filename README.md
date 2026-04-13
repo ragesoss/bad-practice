@@ -2,7 +2,7 @@
 
 A suite of music practice tools that are bad on purpose.
 
-**Live:** https://ragesoss.github.io/bad-metronome/
+**Live:** https://ragesoss.github.io/bad-practice/
 
 ## Tools
 
