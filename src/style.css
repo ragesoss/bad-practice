@@ -1,0 +1,244 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --accent: #e94560;
+  --accent-muted: #0f3460;
+  --text: #eee;
+  --text-dim: #888;
+  --radius: 12px;
+}
+
+html,
+body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+#app {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Header */
+header {
+  text-align: center;
+}
+
+h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Beat dots */
+.beat-display {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.beat-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--accent-muted);
+  transition: transform 0.08s ease-out, background 0.08s ease-out,
+    border-color 0.08s ease-out;
+}
+
+.beat-dot.active {
+  background: var(--accent-muted);
+  border-color: var(--accent-muted);
+  transform: scale(1.3);
+}
+
+.beat-dot.active-downbeat {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.5);
+}
+
+/* BPM display */
+.bpm-display {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.bpm-value {
+  font-size: 3.5rem;
+  font-weight: 700;
+  min-width: 4ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.bpm-adjust {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--accent-muted);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+}
+
+.bpm-adjust:active {
+  background: var(--accent-muted);
+}
+
+/* Sliders */
+.slider-label {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+/* Badness header */
+.badness-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+}
+
+.badness-descriptor {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+/* Sound picker */
+.sound-picker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+select {
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--accent-muted);
+  border-radius: var(--radius);
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Control buttons */
+.controls {
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  padding-top: 0.5rem;
+}
+
+.btn-start,
+.btn-tap {
+  flex: 1;
+  height: 56px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.btn-start {
+  background: #2ecc71;
+  color: #fff;
+}
+
+.btn-start.playing {
+  background: var(--accent);
+}
+
+.btn-start:active {
+  filter: brightness(0.85);
+}
+
+.btn-tap {
+  background: var(--surface);
+  color: var(--text);
+  border: 2px solid var(--accent-muted);
+}
+
+.btn-tap:active {
+  background: var(--accent-muted);
+}
