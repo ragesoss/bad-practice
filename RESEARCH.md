@@ -69,3 +69,59 @@ The standard tanpura tuning patterns and string arrangements were informed by ge
 - **Ni-Sa-Sa-Sa**: First string on the minor seventh (Ni). Less common, used for specific ragas.
 
 The first string typically sounds in a lower octave than the Sa strings. Our implementation places it an octave below Sa, with the last string also an octave below for the bass drone.
+
+## Band: Bluegrass Rhythm Section Synthesis
+
+Bad-in-a-Box synthesizes a three-piece bluegrass rhythm section (upright bass, flatpicking guitar, mandolin) using Web Audio API oscillators and filters. No audio samples are used.
+
+### Rhythm and tempo convention
+
+Bluegrass is typically felt in **cut time** (2/2), where the "beat" musicians count is the half note. The BPM display reflects this convention: 120 BPM means 120 half-note beats per minute, or 240 quarter-note pulses. Each measure has 4 quarter-note beats and 8 eighth-note subdivisions. The scheduler ticks at the eighth-note level.
+
+The standard bluegrass accompaniment pattern per measure:
+- **Bass**: root–fifth–root–fifth on the four quarter-note downbeats
+- **Guitar**: boom (bass note) on downbeats, chuck (chord strum) on upbeats — 4 boom-chuck pairs per measure
+- **Mandolin**: percussive chop on each upbeat — 4 chops per measure
+
+### Upright bass synthesis
+
+A plucked upright bass has a strong fundamental with gentle upper harmonics and a short "thump" transient at the onset. We synthesize this with:
+- A **sine wave** at the fundamental frequency (octave 2, ~65–130 Hz)
+- A quieter **2nd harmonic** (sine at 2× fundamental) for warmth, decaying faster than the fundamental
+- A **lowpass-filtered noise burst** (cutoff 600 Hz) for the pluck transient
+
+The gain envelope is tempo-adaptive: the note rings for ~92% of the quarter-note duration, then fades quickly, leaving a small gap before the next note.
+
+### Guitar synthesis
+
+The guitar uses two distinct voices for the boom-chuck pattern:
+
+**Boom** (bass note on downbeat): A sawtooth oscillator through a lowpass filter (1200 Hz, Q 0.7), preceded by a short noise transient for the pick attack. Sawtooth provides all harmonics (unlike triangle which has only odd harmonics), giving a fuller, more guitar-like timbre. Rings for ~88% of the quarter note.
+
+**Chuck** (chord strum on upbeat): Multiple triangle oscillators at the chord voicing frequencies, each through a lowpass filter, with start times staggered by ~15ms total to simulate the sweep of a pick across strings. A bandpass-filtered noise burst (center 2500 Hz) provides the strum attack. Rings for ~75% of the eighth note.
+
+### Guitar chord voicings and capo system
+
+Rather than computing abstract triads at a fixed octave, the guitar uses **standard open chord shapes** — the same fingerings a real guitarist would play. Each shape is defined as fret positions on the 6 strings of a standard-tuning guitar (E2–A2–D3–G3–B3–E4):
+
+- **G shape**: [3, 2, 0, 0, 0, 3] — produces G2, B2, D3, G3, B3, G4
+- **C shape**: [×, 3, 2, 0, 1, 0] — produces C3, E3, G3, C4, E4
+- **D shape**: [×, ×, 0, 2, 3, 2] — produces D3, A3, D4, F#4
+
+...and so on for D minor, E, E minor, A, A minor, and 7th chord variants.
+
+For keys other than G, a **capo** is applied. The capo position is calculated as the semitone distance from G to the target key. All fret positions are offset by the capo amount when computing frequencies via MIDI-to-frequency conversion (`440 × 2^((midi - 69) / 12)`). This means an A chord in the key of A uses the G shape with capo 2 — exactly as a real bluegrass guitarist would play it.
+
+The voicing frequencies are split into **bass notes** (lowest 2 sounding strings, used for boom) and **treble notes** (remaining strings, used for chuck), with alternating bass on beats 1/3 vs 2/4.
+
+### Mandolin chop synthesis
+
+The mandolin chop is the defining percussive backbeat of bluegrass rhythm. It's mostly attack with minimal sustain — more "chick" than pitched chord. We synthesize it with:
+- A **bandpass-filtered noise burst** (center 3000 Hz, Q 1.5) for the percussive attack, decaying in ~25ms
+- Very short **triangle oscillators** at the chord tones (octave 4), decaying in ~50ms
+
+The chop duration is fixed regardless of tempo — it's a percussive hit, not a sustained note.
+
+### Tempo-adaptive envelopes
+
+All sustained voices (bass, guitar boom, guitar chuck) receive the current quarter-note duration from the scheduler and scale their envelopes accordingly. This ensures notes ring naturally and fill the beat at any tempo, from slow practice tempos (~60 BPM) to fast bluegrass (~140+ BPM), with just enough gap between notes for rhythmic clarity.

@@ -6,6 +6,7 @@
 index.html                    Landing page
 metronome/index.html          Metronome app
 drone/index.html              Drone app
+band/index.html               Bad-in-a-Box app
 
 src/
   shared/
@@ -33,14 +34,27 @@ src/
                               jawari slider, string visualization
     worklet-env.d.ts          TypeScript ambient declarations for AudioWorklet globals
     style.css                 String visualization, cents controls
+  band/
+    main.ts                   Entry point
+    chords.ts                 Chord parsing, frequency calculation, guitar voicings
+                              (open shapes + capo), transposition, preset charts
+    audio.ts                  Web Audio synthesis: upright bass (sine + harmonic),
+                              guitar boom (sawtooth + lowpass), guitar chuck
+                              (staggered triangle strum), mandolin chop
+                              (noise burst + short chord tones)
+    scheduler.ts              Lookahead scheduler with eighth-note ticks,
+                              cut-time BPM, per-instrument badness, BPM drift
+    ui.ts                     DOM wiring, chart display, key/preset selectors,
+                              per-instrument badness + volume sliders, tap tempo
+    style.css                 Chord chart grid, instrument sections
 
-vite.config.ts                Multi-page build config (landing, metronome, drone)
+vite.config.ts                Multi-page build config (landing, metronome, drone, band)
 tsconfig.json                 TypeScript config
 ```
 
 ## Architecture
 
-Each app is a separate Vite entry point. They share a CSS theme but no runtime code. The build produces static files in `dist/` with relative paths, suitable for GitHub Pages or any static host.
+Each app is a separate Vite entry point. They share a CSS theme but no runtime code. The build produces static files in `dist/` with relative paths, suitable for GitHub Pages or any static host. The band app is the largest, containing its own chord parsing system, guitar voicing engine, and multi-instrument scheduler.
 
 ### Metronome audio pipeline
 
@@ -65,9 +79,26 @@ The drone runs a [**Karplus-Strong**](RESEARCH.md#drone-karplus-strong-string-sy
 
 The main thread cycles plucks across the four strings (~800ms apart with jitter) and runs the drift engine every 50ms.
 
+The cello mode uses a simpler subtractive synthesis approach: two sawtooth oscillators detuned by 3 cents, through a lowpass filter at 2kHz, with a smooth ADSR envelope (0.3s attack/release). The detuning creates a warm chorus effect.
+
 Badness operates in two layers:
-- **Per-string jitter**: each string's pitch wobbles independently (fast mean-reverting random walk in cents).
+- **Per-string jitter**: each string's pitch (tanpura) or the single voice (cello) wobbles independently (fast mean-reverting random walk in cents).
 - **Tonic drift**: a single random walk in cents that shifts all strings together. No mean-reversion — the tonic migrates over time. When drift crosses a semitone boundary (±50 cents), the UI snaps the tonic display to the nearest note name.
+
+### Band audio pipeline
+
+Bad-in-a-Box uses a lookahead scheduler similar to the metronome, but ticking at the eighth-note level with BPM interpreted in bluegrass cut-time convention (the displayed BPM is the half-note beat rate). Each measure has 8 ticks: 4 downbeats and 4 upbeats.
+
+Three instruments are synthesized on the main thread using short-lived Web Audio nodes:
+
+- **Upright bass**: Sine wave fundamental + quiet 2nd harmonic, with a lowpass-filtered noise transient at the pluck onset. Plays root-fifth-root-fifth on the four downbeats. Envelope scales with tempo to ring for ~92% of each quarter note.
+- **Guitar boom** (downbeats): Sawtooth oscillator through a lowpass filter (1200 Hz) with a noise pick transient. Uses proper open chord voicings — the chord system maps each chord to a standard guitar shape (G, C, D, Am, Em, etc.) and transposes via capo position based on the selected key. Rings for ~88% of the quarter note.
+- **Guitar chuck** (upbeats): Multiple triangle oscillators at the upper chord tones, staggered by ~15ms for strum spread, each through a lowpass filter. A bandpass-filtered noise burst provides the pick/strum sound. Rings for ~75% of the eighth note.
+- **Mandolin chop** (upbeats): Bandpass-filtered noise burst for the percussive attack, plus very short triangle oscillators at the chord tones in octave 4. The chop is intentionally short (~50ms) regardless of tempo.
+
+Each instrument has an independent gain node for volume control and independent badness that affects timing jitter (random offset per note), wrong notes (probability of semitone errors), and detuning (random cents offset). BPM drift is a shared random walk driven by the average of all three badness values.
+
+The chord/voicing system (`chords.ts`) parses chord names (e.g., "G", "Am", "D7") into root + quality, maps them to standard open guitar shapes with fret positions on 6 strings, and computes frequencies using MIDI-to-frequency conversion with the capo offset. Transposition shifts all chord names by the semitone difference between the original and target keys. The guitar voicing splits string frequencies into bass notes (lowest 2 strings for boom) and treble notes (remaining strings for chuck).
 
 ## Development History
 
@@ -84,6 +115,10 @@ The conversational development process shaped the architecture in ways that a sp
 **Enhanced badness**: Evolved badness from a single per-beat jitter into a two-component system with short-term inaccuracy and long-term drift. The drift is a pure random walk (no mean-reversion) so the tools genuinely wander away from their starting point over time. Added live UI feedback: the metronome's BPM display updates each beat to show effective tempo, and the drone's tonic display shows the nearest note name + cents offset, snapping to a new note when drift crosses a semitone boundary. Added cents fine-tuning controls for the drone.
 
 **Visual design**: Color palette inspired by Andy Warhol — hot pink, electric yellow, turquoise on a near-black background with warm cream text.
+
+**Cello drone**: Added a second instrument option to Bad Drone — a simple dual-oscillator cello voice using detuned sawtooth waves through a lowpass filter. Shares the same drift engine and UI as the tanpura, with tanpura-specific controls (string visualization, tuning pattern, jawari) hidden when cello is selected.
+
+**Bad-in-a-Box**: Added a bluegrass backup band page with three synthesized instruments (bass, guitar, mandolin) playing over repeating chord charts. The rhythm follows bluegrass cut-time convention with eighth-note scheduling. Developed the guitar voicing system to use standard open chord shapes (G, C, D, Am, Em, A, E, B7, etc.) transposed via capo position based on the selected key, producing frequency arrays split into bass notes (for boom) and treble notes (for chuck). Audio envelopes are tempo-adaptive — each instrument receives the current quarter-note duration and scales its sustain accordingly, so notes ring naturally at any BPM. Preset charts include common bluegrass progressions with transposition support for all 12 keys.
 
 ## Build & Deploy
 

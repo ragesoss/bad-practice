@@ -51,3 +51,13 @@
 .tool-card:nth-child(2):hover {
   box-shadow: 0 6px 24px rgba(45, 212, 191, 0.2);
 }
+
+.tool-card:nth-child(3) {
+  border-color: var(--orange);
+}
+.tool-card:nth-child(3) h2 {
+  color: var(--orange);
+}
+.tool-card:nth-child(3):hover {
+  box-shadow: 0 6px 24px rgba(255, 107, 53, 0.2);
+}
